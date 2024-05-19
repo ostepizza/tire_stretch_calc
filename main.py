@@ -17,11 +17,11 @@ outline_rim_color = 'white'
 outline_tire_color = 'red'
 font_color = 'red'
 
-########################################
-
 # Extra inches to simulate rim diameter and lip
 rim_diameter_additional = 0
 rim_width_additional = 1
+
+########################################
 
 # Convert rim size in inches to pixels
 rim_diameter = (rim_diameter_inch + rim_diameter_additional) * image_dpi
