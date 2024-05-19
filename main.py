@@ -2,6 +2,12 @@ from PIL import Image, ImageDraw, ImageFont
 
 ########################################
 
+# INPUT VARS
+rim_diameter_inch = 17
+rim_width_inch = 7.5
+tire_width_mm = 205
+tire_height_relative = 45
+
 # IMAGE VARS
 image_width = 500
 image_height = 500
@@ -10,12 +16,6 @@ outline_width = 2
 outline_rim_color = 'white'
 outline_tire_color = 'red'
 font_color = 'red'
-
-# INPUT VARS
-rim_diameter_inch = 17
-rim_width_inch = 7.5
-tire_width_mm = 205
-tire_height_relative = 45
 
 ########################################
 
