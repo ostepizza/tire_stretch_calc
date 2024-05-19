@@ -73,17 +73,18 @@ teyt2 = tsyt2
 # Set up image and draw object
 img = Image.new('RGB', (image_width, image_height), 'black')
 draw = ImageDraw.Draw(img)
+outline_width_relative = round((outline_width * image_dpi) / 16)
 
 # Define points for rim, tire top and tire bottom, and draw them
 rim_coordinates = [(rsx, rsy), (rex, rsy), (rex, rey), (rsx, rey)]
 tire_coordinates_top = [(tsxt, tsyt), (text, teyt), (texb, teyb), (tsxb, tsyb)]
 tire_coordinates_bottom = [(tsxt2, tsyt2), (text2, teyt2), (texb2, teyb2), (tsxb2, tsyb2)]
-draw.polygon(rim_coordinates, outline=outline_rim_color, width=outline_width)
-draw.polygon(tire_coordinates_top, outline=outline_tire_color, width=outline_width)
-draw.polygon(tire_coordinates_bottom, outline=outline_tire_color, width=outline_width)
+draw.polygon(rim_coordinates, outline=outline_rim_color, width=outline_width_relative)
+draw.polygon(tire_coordinates_top, outline=outline_tire_color, width=outline_width_relative)
+draw.polygon(tire_coordinates_bottom, outline=outline_tire_color, width=outline_width_relative)
 
 # Text to display rim and tire size
-font = ImageFont.truetype("arial.ttf", 15)
+font = ImageFont.truetype("arial.ttf", image_dpi)
 text_position = (10, 10)
 text = str(rim_diameter_inch) + "x" + str(rim_width_inch) + ", " + str(tire_width_mm) + "/" + str(tire_height_relative) + "R" + (str(rim_diameter_inch))
 draw.text(text_position, text, fill=font_color, font=font)
