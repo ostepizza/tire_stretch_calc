@@ -1,6 +1,6 @@
 # tire_stretch_calc
 
-This script generates a visualization of a tire and rim configuration based on input variables.
+This Python script generates a visualization of a tire and rim configuration based on input variables.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ This script generates a visualization of a tire and rim configuration based on i
 
 Modify the following input variables as desired:
 
-## Rim and Tire Variables
+### Rim and Tire Variables
 Using example 7.5 inch wide 17" rim, on 205/45R17 tires:
 - `rim_diameter_inch`: Diameter of the rim in inches (17).
 - `rim_width_inch`: Width of the rim in inches (7.5).
@@ -18,7 +18,7 @@ Using example 7.5 inch wide 17" rim, on 205/45R17 tires:
 - `tire_height_relative`: Relative height of the tire (45).
 - As tire size (R17) is the same as the rim diameter, it is not used
 
-## Image Variables
+### Image Variables
 
 - `image_width`: Image width in pixels.
 - `image_height`: Image height in pixels.
