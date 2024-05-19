@@ -28,7 +28,7 @@ Using example 7.5 inch wide 17" rim, on 205/45R17 tires:
 - `outline_tire_color`: Color of the tire outline.
 - `font_color`: Color of the text.
 
-### Additiona Variables
+### Additional Variables
 - `rim_diameter_additional`: Extra inches to account for diameter. Default is 0,
 and should not need to be modified, as visualization shows inner diameter but outside width.
 - `rim_width_additional`: Extra inches to account for width. Default is 1, estimating a 0.5" lip on each side of the rim
