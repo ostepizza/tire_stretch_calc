@@ -4,21 +4,25 @@ import json
 class Tire:
     def __init__(self, rim_diameter_inch = 17, rim_width_inch = 7.5, tire_width_mm = 205, tire_height_relative = 45, rim_diameter_additional = 0, rim_width_additional = 1):
         self.rim_diameter_inch = rim_diameter_inch
+        self.rim_diameter_mm = self.rim_diameter_inch * 25.4
         self.rim_width_inch = rim_width_inch
-        self.tire_width_mm = tire_width_mm
-        self.tire_height_relative = tire_height_relative
-        self.rim_diameter_additional = rim_diameter_additional
-        self.rim_width_additional = rim_width_additional
+        self.rim_width_mm = self.rim_width_inch * 25.4
+        self.rim_diameter_additional_inch = rim_diameter_additional
+        self.rim_diameter_additional_mm = self.rim_diameter_additional_inch * 25.4
+        self.rim_width_additional_inch = rim_width_additional
+        self.rim_width_additional_mm = self.rim_width_additional_inch * 25.4
 
-        # Convert tire size in inches to pixels
-        self.tire_width_inch = self.tire_width_mm / 25.4
-        self.tire_width_t = self.tire_width_inch
-        self.tire_width_b = self.rim_width_inch + self.rim_width_additional
+        self.tire_width_t_mm = tire_width_mm
+        self.tire_width_t_inch = self.tire_width_t_mm / 25.4
+        self.tire_width_b_inch = self.rim_width_inch + self.rim_width_additional_inch
+        self.tire_width_b_mm = self.tire_width_b_inch * 25.4
+        self.tire_height_relative = tire_height_relative
 
         # Calculate difference between top and bottom tire width, to get a relative height using sidewall length
-        self.__tire_area = self.tire_width_t * (self.tire_width_t * (self.tire_height_relative / 100))
-        self.__average_width = (self.tire_width_t + self.tire_width_b) / 2
-        self.tire_height = self.__tire_area / self.__average_width
+        self.__tire_area = self.tire_width_t_inch * (self.tire_width_t_inch * (self.tire_height_relative / 100))
+        self.__average_width = (self.tire_width_t_inch + self.tire_width_b_inch) / 2
+        self.tire_height_adj_inch = self.__tire_area / self.__average_width
+        self.tire_height_adj_mm = self.tire_height_adj_inch * 25.4
 
 def compareTires(tires):
     if not all(isinstance(tire, Tire) for tire in tires):
@@ -28,7 +32,7 @@ def compareTires(tires):
     base_tire = tires[0]
 
     # Base tire properties
-    base_tire_diameter_mm = round((base_tire.rim_diameter_inch * 25.4) + ((base_tire.tire_height * 25.4) * 2), 2) 
+    base_tire_diameter_mm = round(base_tire.rim_diameter_mm + (base_tire.tire_height_adj_mm * 2), 2) 
     base_tire_circumference_mm = round(base_tire_diameter_mm * 3.14159265359, 2)
     tire_speedometer_difference_percent = 0
     base_tire_reading_50kmh = 50
@@ -37,7 +41,7 @@ def compareTires(tires):
 
     # Add the base tire to the comparison list
     base_tire_dict = {
-        'tire': str(base_tire.rim_diameter_inch) + "x" + str(base_tire.rim_width_inch) + ", " + str(base_tire.tire_width_mm) + "/" + str(base_tire.tire_height_relative) + "R" + (str(base_tire.rim_diameter_inch)),
+        'tire': str(base_tire.rim_diameter_inch) + "x" + str(base_tire.rim_width_inch) + ", " + str(base_tire.tire_width_t_mm) + "/" + str(base_tire.tire_height_relative) + "R" + (str(base_tire.rim_diameter_inch)),
         'diameter_mm': base_tire_diameter_mm,
         'circumference_mm': base_tire_circumference_mm,
         'speedometer_difference_percent': tire_speedometer_difference_percent,
@@ -50,7 +54,7 @@ def compareTires(tires):
 
     for tire in tires[1:]:
         # Calculate the properties for the tire
-        tire_diameter_mm = round((tire.rim_diameter_inch * 25.4) + ((tire.tire_height * 25.4) * 2), 2)
+        tire_diameter_mm = round(tire.rim_diameter_mm + (tire.tire_height_adj_mm * 2), 2)
         tire_circumference_mm = round(tire_diameter_mm * 3.14159265359, 2)
 
         # Calculate the difference in speedometer reading
@@ -70,7 +74,7 @@ def compareTires(tires):
 
         # Add the tire to the comparison list
         tire_dict = {
-            'tire': str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch)),
+            'tire': str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_t_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch)),
             'diameter_mm': tire_diameter_mm,
             'circumference_mm': tire_circumference_mm,
             'speedometer_difference_percent': tire_speedometer_difference_percent,
@@ -102,9 +106,9 @@ def generateTireImageSide(tire):
 
     # Convert rim size in inches to pixels
     rim_diameter = (tire.rim_diameter_inch) * image_dpi
-    rim_diameter_lip = (tire.rim_diameter_additional * image_dpi)
+    rim_diameter_lip = (tire.rim_diameter_additional_inch * image_dpi)
 
-    tire_height = tire.tire_height * image_dpi
+    tire_height = tire.tire_height_adj_inch * image_dpi
 
     # Calculate the top-left and bottom-right coordinates for the circle
     rim_top_left = ((image_width - rim_diameter) / 2, (image_height - rim_diameter) / 2)
@@ -127,11 +131,11 @@ def generateTireImageSide(tire):
     # Text to display rim and tire size
     font = ImageFont.truetype("arial.ttf", image_dpi)
     text_position = (10, 10)
-    image_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch))
+    image_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_t_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch))
     draw.text(text_position, image_text, fill=font_color, font=font)
 
     # Save the image
-    filename_text = 'side_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
+    filename_text = 'side_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
     img.save(filename_text  + '.png')
     img.save('side_latest.png')
     print ("Image saved as: ", filename_text + '.png and side_latest.png')
@@ -151,13 +155,13 @@ def generateTireImageFront(tire):
 
     # Convert rim size in inches to pixels
     rim_diameter = (tire.rim_diameter_inch) * image_dpi
-    rim_diameter_lip = (tire.rim_diameter_additional * image_dpi)
-    rim_width = (tire.rim_width_inch + tire.rim_width_additional) * image_dpi
+    rim_diameter_lip = (tire.rim_diameter_additional_inch * image_dpi)
+    rim_width = (tire.rim_width_inch + tire.rim_width_additional_inch) * image_dpi
 
     # Convert tire top and bottom size in inches to pixels, as well as height
-    tire_width_t = tire.tire_width_t * image_dpi
-    tire_width_b = tire.tire_width_b * image_dpi
-    tire_height = tire.tire_height * image_dpi
+    tire_width_t = tire.tire_width_t_inch * image_dpi
+    tire_width_b = tire.tire_width_b_inch * image_dpi
+    tire_height = tire.tire_height_adj_inch * image_dpi
 
     # Coordinates of the rim (since rim is square, only four are needed)
     # rsx = rim start x, rey = rim end y 
@@ -227,11 +231,11 @@ def generateTireImageFront(tire):
     # Text to display rim and tire size
     font = ImageFont.truetype("arial.ttf", image_dpi)
     text_position = (10, 10)
-    image_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch))
+    image_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_t_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch))
     draw.text(text_position, image_text, fill=font_color, font=font)
 
     # Save the image
-    filename_text = 'front_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
+    filename_text = 'front_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
     img.save(filename_text  + '.png')
     img.save('front_latest.png')
     print ("Image saved as: ", filename_text + '.png and front_latest.png')
@@ -244,4 +248,4 @@ tire_compare_2 = Tire(17, 7.5, 205, 55, 1.5, 1)
 tire_compare_3 = Tire(17, 7.5, 160, 58, 1.5, 1)
 compareTires([tire_baseline, tire_compare, tire_compare_2, tire_compare_3])
 generateTireImageFront(tire_compare_3)
-#generateTireImageSide(tire_baseline)
+generateTireImageSide(tire_baseline)
