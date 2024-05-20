@@ -28,7 +28,7 @@ def compareTires(tires):
     base_tire = tires[0]
 
     # Base tire properties
-    base_tire_diameter_mm = round((base_tire.rim_diameter_inch * 25.4) + ((base_tire.tire_width_mm * (base_tire.tire_height_relative / 100)) * 2), 2)
+    base_tire_diameter_mm = round((base_tire.rim_diameter_inch * 25.4) + ((base_tire.tire_height * 25.4) * 2), 2) 
     base_tire_circumference_mm = round(base_tire_diameter_mm * 3.14159265359, 2)
     tire_speedometer_difference_percent = 0
     base_tire_reading_50kmh = 50
@@ -50,7 +50,7 @@ def compareTires(tires):
 
     for tire in tires[1:]:
         # Calculate the properties for the tire
-        tire_diameter_mm = round((tire.rim_diameter_inch * 25.4) + ((tire.tire_width_mm * (tire.tire_height_relative / 100)) * 2), 2)
+        tire_diameter_mm = round((tire.rim_diameter_inch * 25.4) + ((tire.tire_height * 25.4) * 2), 2)
         tire_circumference_mm = round(tire_diameter_mm * 3.14159265359, 2)
 
         # Calculate the difference in speedometer reading
@@ -159,11 +159,6 @@ def generateTireImageFront(tire):
     tire_width_b = tire.tire_width_b * image_dpi
     tire_height = tire.tire_height * image_dpi
 
-    print("Rim diameter: ", rim_diameter)
-    print("Rim width: ", rim_width)
-    print("Tire width: ", tire_width_t, tire_width_b)
-    print("Tire height: ", tire_height)
-
     # Coordinates of the rim (since rim is square, only four are needed)
     # rsx = rim start x, rey = rim end y 
     rsx = image_width / 2 - rim_width / 2
@@ -246,6 +241,7 @@ tire_baseline = Tire(17, 7.5, 205, 45, 1.5, 1)
 #tire_compare_2 = Tire(17, 7.5, 180, 40, 1.5, 1)
 tire_compare = Tire(17, 7.5, 205, 50, 1.5, 1)
 tire_compare_2 = Tire(17, 7.5, 205, 55, 1.5, 1)
-compareTires([tire_baseline, tire_compare, tire_compare_2])
-generateTireImageFront(tire_baseline)
-generateTireImageSide(tire_baseline)
+tire_compare_3 = Tire(17, 7.5, 160, 58, 1.5, 1)
+compareTires([tire_baseline, tire_compare, tire_compare_2, tire_compare_3])
+generateTireImageFront(tire_compare_3)
+#generateTireImageSide(tire_baseline)
