@@ -1,2 +1,2 @@
-*.png
-*.json
+/output
+config.json
