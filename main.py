@@ -1,5 +1,11 @@
 from PIL import Image, ImageDraw, ImageFont
+import os
 import json
+
+# Create output file folder if it doesn't exist
+subfolder = 'output'
+if not os.path.exists('output'):
+    os.makedirs('output')
 
 class Tire:
     def __init__(self, rim_diameter_inch = 17, rim_width_inch = 7.5, tire_width_mm = 205, tire_height_relative = 45, rim_diameter_additional = 0, rim_width_additional = 1):
@@ -86,7 +92,7 @@ def compareTires(tires):
         comparison.append(tire_dict)
 
     # Save the tire comparisons to a JSON file
-    with open('comparison.json', 'w') as output_file:
+    with open(os.path.join(subfolder, 'comparison.json'), 'w') as output_file:
         json.dump(comparison, output_file, indent=4)
 
     return
@@ -136,8 +142,8 @@ def generateTireImageSide(tire):
 
     # Save the image
     filename_text = 'side_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
-    img.save(filename_text  + '.png')
-    img.save('side_latest.png')
+    img.save(os.path.join(subfolder, filename_text)  + '.png')
+    img.save(os.path.join(subfolder, 'side_latest.png'))
     print ("Image saved as: ", filename_text + '.png and side_latest.png')
 
 def generateTireImageFront(tire):
@@ -236,8 +242,8 @@ def generateTireImageFront(tire):
 
     # Save the image
     filename_text = 'front_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
-    img.save(filename_text  + '.png')
-    img.save('front_latest.png')
+    img.save(os.path.join(subfolder, filename_text)  + '.png')
+    img.save(os.path.join(subfolder, 'front_latest.png'))
     print ("Image saved as: ", filename_text + '.png and front_latest.png')
 
 tire_baseline = Tire(17, 7.5, 205, 45, 1.5, 1)
