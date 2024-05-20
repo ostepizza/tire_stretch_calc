@@ -8,6 +8,7 @@ def load_settings():
         config = {
             "save_images": True,
             "save_comparison": True,
+            "generate_image_on_compare": False,
             "output_folder": "output",
             "image_width": 500,
             "image_height": 500,
@@ -119,10 +120,17 @@ def compareTires(tires):
 
         comparison.append(tire_dict)
 
-    # Save the tire comparisons to a JSON file
-    with open(os.path.join(subfolder, 'comparison.json'), 'w') as output_file:
-        json.dump(comparison, output_file, indent=4)
-        print ("Tire comparison saved as: comparison.json")
+        if config['generate_image_on_compare'] is True:
+            generateTireImageFront(tire)
+            generateTireImageSide(tire)
+
+    if config['save_comparison'] is True:
+        # Save the tire comparisons to a JSON file
+        with open(os.path.join(subfolder, 'comparison.json'), 'w') as output_file:
+            json.dump(comparison, output_file, indent=4)
+            print ("Tire comparison saved as: comparison.json")
+    else:
+        print(json.dumps(comparison, indent=4))
 
     return
 
@@ -172,10 +180,13 @@ def generateTireImageSide(tire):
     draw.text(text_position, image_text, fill=font_color, font=font)
 
     # Save the image
-    filename_text = 'side_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
-    img.save(os.path.join(subfolder, filename_text)  + '.png')
-    img.save(os.path.join(subfolder, 'side_latest.png'))
-    print ("Image saved as: ", filename_text + '.png and side_latest.png')
+    if config['save_images'] is True:
+        filename_text = 'side_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
+        img.save(os.path.join(subfolder, filename_text)  + '.png')
+        img.save(os.path.join(subfolder, 'side_latest.png'))
+        print ("Image saved as: ", filename_text + '.png and side_latest.png')
+    else:
+        img.show()
 
 # Generate an image of the tire from the front
 def generateTireImageFront(tire):
@@ -274,10 +285,13 @@ def generateTireImageFront(tire):
     draw.text(text_position, image_text, fill=font_color, font=font)
 
     # Save the image
-    filename_text = 'front_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
-    img.save(os.path.join(subfolder, filename_text)  + '.png')
-    img.save(os.path.join(subfolder, 'front_latest.png'))
-    print ("Image saved as: ", filename_text + '.png and front_latest.png')
+    if config['save_images'] is True:
+        filename_text = 'front_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_t_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
+        img.save(os.path.join(subfolder, filename_text)  + '.png')
+        img.save(os.path.join(subfolder, 'front_latest.png'))
+        print ("Image saved as: ", filename_text + '.png and front_latest.png')
+    else:
+        img.show()
 
 tire_baseline = Tire(17, 7.5, 205, 45, 1.5, 1)
 tire_compare = Tire(17, 7.5, 205, 50, 1.5, 1)
