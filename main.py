@@ -2,11 +2,38 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 import json
 
-# Create output file folder if it doesn't exist
-subfolder = 'output'
-if not os.path.exists('output'):
-    os.makedirs('output')
+# Load settings from config.json, or create it if it doesn't exist
+def load_settings():
+    if not os.path.exists('config.json'):
+        config = {
+            "save_images": True,
+            "save_comparison": True,
+            "output_folder": "output",
+            "image_width": 500,
+            "image_height": 500,
+            "image_dpi": 16,
+            "outline_width": 2,
+            "outline_rim_color": "white",
+            "outline_tire_color": "red",
+            "font_color": "red",
+            "font": "arial.ttf"
+        }
+        with open('config.json', 'w') as f:
+            json.dump(config, f, indent=4)
+    else:
+        with open('config.json', 'r') as f:
+            config = json.load(f)
+    return config
 
+config = load_settings()
+
+# Create output file folder if it doesn't exist
+if config['save_images'] is True or config['save_comparison'] is True:
+    subfolder = config['output_folder']
+    if not os.path.exists(subfolder):
+        os.makedirs(subfolder)
+
+# Tire class to store tire properties
 class Tire:
     def __init__(self, rim_diameter_inch = 17, rim_width_inch = 7.5, tire_width_mm = 205, tire_height_relative = 45, rim_diameter_additional = 0, rim_width_additional = 1):
         self.rim_diameter_inch = rim_diameter_inch
@@ -30,6 +57,7 @@ class Tire:
         self.tire_height_adj_inch = self.__tire_area / self.__average_width
         self.tire_height_adj_mm = self.tire_height_adj_inch * 25.4
 
+# Compare a list of tires to a base tire (base tire is the first tire in the list)
 def compareTires(tires):
     if not all(isinstance(tire, Tire) for tire in tires):
         raise TypeError('All elements in the list must be Tire objects')
@@ -94,21 +122,24 @@ def compareTires(tires):
     # Save the tire comparisons to a JSON file
     with open(os.path.join(subfolder, 'comparison.json'), 'w') as output_file:
         json.dump(comparison, output_file, indent=4)
+        print ("Tire comparison saved as: comparison.json")
 
     return
 
+# Generate an image of the tire from the side
 def generateTireImageSide(tire):
     if not isinstance(tire, Tire):
         raise TypeError('Expected a Tire object')
     
     # Image settings
-    image_width = 500
-    image_height = 500
-    image_dpi = 16
-    outline_width = 2
-    outline_rim_color = 'white'
-    outline_tire_color = 'red'
-    font_color = 'red'
+    image_width = config['image_width']
+    image_height = config['image_height']
+    image_dpi = config['image_dpi']
+    outline_width = config['outline_width']
+    outline_rim_color = config['outline_rim_color']
+    outline_tire_color = config['outline_tire_color']
+    font_color = config['font_color']
+    font = config['font']
 
     # Convert rim size in inches to pixels
     rim_diameter = (tire.rim_diameter_inch) * image_dpi
@@ -135,7 +166,7 @@ def generateTireImageSide(tire):
     draw.ellipse([tire_top_left, tire_bottom_right], outline=outline_tire_color, width=outline_width_relative)
     
     # Text to display rim and tire size
-    font = ImageFont.truetype("arial.ttf", image_dpi)
+    font = ImageFont.truetype(font, image_dpi)
     text_position = (10, 10)
     image_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_t_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch))
     draw.text(text_position, image_text, fill=font_color, font=font)
@@ -146,18 +177,20 @@ def generateTireImageSide(tire):
     img.save(os.path.join(subfolder, 'side_latest.png'))
     print ("Image saved as: ", filename_text + '.png and side_latest.png')
 
+# Generate an image of the tire from the front
 def generateTireImageFront(tire):
     if not isinstance(tire, Tire):
         raise TypeError('Expected a Tire object')
     
     # Image settings
-    image_width = 500
-    image_height = 500
-    image_dpi = 16
-    outline_width = 2
-    outline_rim_color = 'white'
-    outline_tire_color = 'red'
-    font_color = 'red'
+    image_width = config['image_width']
+    image_height = config['image_height']
+    image_dpi = config['image_dpi']
+    outline_width = config['outline_width']
+    outline_rim_color = config['outline_rim_color']
+    outline_tire_color = config['outline_tire_color']
+    font_color = config['font_color']
+    font = config['font']
 
     # Convert rim size in inches to pixels
     rim_diameter = (tire.rim_diameter_inch) * image_dpi
@@ -235,7 +268,7 @@ def generateTireImageFront(tire):
     draw.line(rim_lip_coordinates_right, fill=outline_rim_color, width=outline_width_relative)
 
     # Text to display rim and tire size
-    font = ImageFont.truetype("arial.ttf", image_dpi)
+    font = ImageFont.truetype(font, image_dpi)
     text_position = (10, 10)
     image_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_t_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch))
     draw.text(text_position, image_text, fill=font_color, font=font)
@@ -247,11 +280,7 @@ def generateTireImageFront(tire):
     print ("Image saved as: ", filename_text + '.png and front_latest.png')
 
 tire_baseline = Tire(17, 7.5, 205, 45, 1.5, 1)
-#tire_compare = Tire(17, 7.5, 180, 60, 1.5, 1)
-#tire_compare_2 = Tire(17, 7.5, 180, 40, 1.5, 1)
 tire_compare = Tire(17, 7.5, 205, 50, 1.5, 1)
-tire_compare_2 = Tire(17, 7.5, 205, 55, 1.5, 1)
-tire_compare_3 = Tire(17, 7.5, 160, 58, 1.5, 1)
-compareTires([tire_baseline, tire_compare, tire_compare_2, tire_compare_3])
-generateTireImageFront(tire_compare_3)
+compareTires([tire_baseline, tire_compare])
+generateTireImageFront(tire_baseline)
 generateTireImageSide(tire_baseline)
