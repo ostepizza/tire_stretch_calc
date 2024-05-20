@@ -10,6 +10,16 @@ class Tire:
         self.rim_diameter_additional = rim_diameter_additional
         self.rim_width_additional = rim_width_additional
 
+        # Convert tire size in inches to pixels
+        self.tire_width_inch = self.tire_width_mm / 25.4
+        self.tire_width_t = self.tire_width_inch
+        self.tire_width_b = self.rim_width_inch + self.rim_width_additional
+
+        # Calculate difference between top and bottom tire width, to get a relative height using sidewall length
+        self.__tire_area = self.tire_width_t * (self.tire_width_t * (self.tire_height_relative / 100))
+        self.__average_width = (self.tire_width_t + self.tire_width_b) / 2
+        self.tire_height = self.__tire_area / self.__average_width
+
 def compareTires(tires):
     if not all(isinstance(tire, Tire) for tire in tires):
         raise TypeError('All elements in the list must be Tire objects')
@@ -77,7 +87,56 @@ def compareTires(tires):
 
     return
 
-def generateTireImage(tire):
+def generateTireImageSide(tire):
+    if not isinstance(tire, Tire):
+        raise TypeError('Expected a Tire object')
+    
+    # Image settings
+    image_width = 500
+    image_height = 500
+    image_dpi = 16
+    outline_width = 2
+    outline_rim_color = 'white'
+    outline_tire_color = 'red'
+    font_color = 'red'
+
+    # Convert rim size in inches to pixels
+    rim_diameter = (tire.rim_diameter_inch) * image_dpi
+    rim_diameter_lip = (tire.rim_diameter_additional * image_dpi)
+
+    tire_height = tire.tire_height * image_dpi
+
+    # Calculate the top-left and bottom-right coordinates for the circle
+    rim_top_left = ((image_width - rim_diameter) / 2, (image_height - rim_diameter) / 2)
+    rim_bottom_right = ((image_width + rim_diameter) / 2, (image_height + rim_diameter) / 2)
+    rim_lip_top_left = ((image_width - rim_diameter - rim_diameter_lip) / 2, (image_height - rim_diameter - rim_diameter_lip) / 2)
+    rim_lip_bottom_right = ((image_width + rim_diameter + rim_diameter_lip) / 2, (image_height + rim_diameter + rim_diameter_lip) / 2)
+    tire_top_left = ((image_width - rim_diameter - (tire_height * 2)) / 2, (image_width - rim_diameter - (tire_height * 2)) / 2)
+    tire_bottom_right = ((image_width + rim_diameter + (tire_height * 2)) / 2, (image_width + rim_diameter + (tire_height * 2)) / 2)
+
+    # Set up image and draw object
+    img = Image.new('RGB', (image_width, image_height), 'black')
+    draw = ImageDraw.Draw(img)
+    outline_width_relative = round((outline_width * image_dpi) / 16)
+
+    # Draw the rim, rim lip, then tire
+    draw.ellipse([rim_top_left, rim_bottom_right], outline=outline_rim_color, width=outline_width_relative)
+    draw.ellipse([rim_lip_top_left, rim_lip_bottom_right], outline=outline_rim_color, width=outline_width_relative)
+    draw.ellipse([tire_top_left, tire_bottom_right], outline=outline_tire_color, width=outline_width_relative)
+    
+    # Text to display rim and tire size
+    font = ImageFont.truetype("arial.ttf", image_dpi)
+    text_position = (10, 10)
+    image_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + ", " + str(tire.tire_width_mm) + "/" + str(tire.tire_height_relative) + "R" + (str(tire.rim_diameter_inch))
+    draw.text(text_position, image_text, fill=font_color, font=font)
+
+    # Save the image
+    filename_text = 'side_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
+    img.save(filename_text  + '.png')
+    img.save('side_latest.png')
+    print ("Image saved as: ", filename_text + '.png and side_latest.png')
+
+def generateTireImageFront(tire):
     if not isinstance(tire, Tire):
         raise TypeError('Expected a Tire object')
     
@@ -95,15 +154,10 @@ def generateTireImage(tire):
     rim_diameter_lip = (tire.rim_diameter_additional * image_dpi)
     rim_width = (tire.rim_width_inch + tire.rim_width_additional) * image_dpi
 
-    # Convert tire size in inches to pixels
-    tire_width_inch = tire.tire_width_mm / 25.4
-    tire_width_t = tire_width_inch * image_dpi # top tire width is th
-    tire_width_b = rim_width # bottom tire width is the same as rim width due to seating
-
-    # Calculate difference between top and bottom tire width, to get a relative height using sidewall length
-    tire_area = tire_width_t * (tire_width_t * (tire.tire_height_relative / 100))
-    average_width = (tire_width_t + tire_width_b) / 2
-    tire_height = tire_area / average_width
+    # Convert tire top and bottom size in inches to pixels, as well as height
+    tire_width_t = tire.tire_width_t * image_dpi
+    tire_width_b = tire.tire_width_b * image_dpi
+    tire_height = tire.tire_height * image_dpi
 
     print("Rim diameter: ", rim_diameter)
     print("Rim width: ", rim_width)
@@ -182,13 +236,16 @@ def generateTireImage(tire):
     draw.text(text_position, image_text, fill=font_color, font=font)
 
     # Save the image
-    filename_text = str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
+    filename_text = 'front_' + str(tire.rim_diameter_inch) + "x" + str(tire.rim_width_inch) + "_" + str(tire.tire_width_mm) + "_" + str(tire.tire_height_relative) + "R" + str(tire.rim_diameter_inch)
     img.save(filename_text  + '.png')
-    img.save('latest.png')
-    print ("Image saved as: ", filename_text + '.png and latest.png')
+    img.save('front_latest.png')
+    print ("Image saved as: ", filename_text + '.png and front_latest.png')
 
 tire_baseline = Tire(17, 7.5, 205, 45, 1.5, 1)
-tire_compare = Tire(17, 7.5, 180, 60, 1.5, 1)
-tire_compare_2 = Tire(17, 7.5, 180, 40, 1.5, 1)
+#tire_compare = Tire(17, 7.5, 180, 60, 1.5, 1)
+#tire_compare_2 = Tire(17, 7.5, 180, 40, 1.5, 1)
+tire_compare = Tire(17, 7.5, 205, 50, 1.5, 1)
+tire_compare_2 = Tire(17, 7.5, 205, 55, 1.5, 1)
 compareTires([tire_baseline, tire_compare, tire_compare_2])
-#generateTireImage(tire)
+generateTireImageFront(tire_baseline)
+generateTireImageSide(tire_baseline)
